@@ -1,0 +1,49 @@
+name: Release
+
+# Produces the installable zip. Decky's third-party plugin field takes a URL,
+# not a local file, so a published release asset is what makes installation
+# without the store possible at all.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish the plugin zip
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
+
+      - run: yarn install --immutable
+
+      # Never ship something that does not pass its own checks.
+      - run: yarn typecheck
+      - run: yarn lint
+      - run: yarn test
+      - run: yarn build
+
+      # Decky expects a single top-level folder holding plugin.json, the built
+      # frontend and the Python backend. The folder name is just the install
+      # directory; the plugin's display name comes from plugin.json.
+      - name: Assemble the plugin folder
+        run: |
+          mkdir -p out/retroachievements
+          cp -r dist main.py py_modules plugin.json package.json LICENSE README.md \
+            out/retroachievements/
+
+      - name: Create the zip
+        run: cd out && zip -r ../retroachievements.zip retroachievements
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: retroachievements.zip
+          generate_release_notes: true

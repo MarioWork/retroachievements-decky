@@ -11,11 +11,15 @@ check what you have left to unlock without leaving Game Mode.
 ## What it does
 
 - **Dashboard** — avatar, points and rank, your recent unlocks, and your recently played games.
-- **Game browser** — every game you have progress on, filterable by title.
+- **Game browser** — your whole library, filterable by title and console, sortable by recently
+  played, closest to finish, most complete or title.
 - **Game view** — a game's **complete** achievement list, unlocked and locked in one place.
   Unlocked entries show the colour badge, points and the date you earned them; locked entries show
-  the greyed `_lock` badge and the description of what you still have to do. Sorted unlocked-first
-  with a `34 / 56 · 61%` progress bar.
+  the greyed `_lock` badge and the description of what you still have to do. Sort by unlocked,
+  locked or most recent, or filter down to only what is left. `34 / 56 · 61%` progress bar.
+- **Unlock notifications** (optional, off by default) — a Steam toast when you earn something.
+- **Works offline** — shows cached data labelled with its age when RetroAchievements is
+  unreachable, rather than an error screen.
 
 ## Screenshots
 
@@ -23,7 +27,7 @@ _To add: dashboard and game view._
 
 ## Requirements
 
-- A Steam Deck with [Decky Loader](https://decky.xyz) installed
+- A Steam Deck (or other SteamOS device) with [Decky Loader](https://decky.xyz) installed
 - A [RetroAchievements](https://retroachievements.org) account
 
 ## Getting your API key
@@ -37,15 +41,77 @@ API traffic and grants no access to anything that is not already public on your 
 
 ## Install
 
-Copy the plugin to `~/homebrew/plugins/retroachievements/` on your Deck and restart Decky:
+This plugin is **not on the Decky store**, so install it by one of the routes below. All of them
+work on a stock Deck with Decky Loader — nothing else is required.
+
+### Option 1 — from a release zip (recommended, no PC needed)
+
+Everything happens on the Deck itself, in Game Mode.
+
+1. Copy the zip URL from the [latest release](../../releases/latest) — right-click
+   `retroachievements.zip` → copy link. It looks like:
+
+   ```
+   https://github.com/MarioWork/retroachievements-decky/releases/latest/download/retroachievements.zip
+   ```
+
+2. On the Deck, open the **Decky** menu (the plug icon in Quick Access) and press the **gear**.
+3. **General** → turn on **Developer mode**.
+4. A **Developer** tab appears. Open it and find **Third-Party Plugins**.
+5. Paste the URL into the field and press **Install**.
+
+> Decky takes a **URL**, not a local file — SteamOS does not expose a file picker to it. If you
+> build your own zip, it needs to be reachable over HTTP.
+
+### Option 2 — copy it over SSH (for development)
+
+Best if you are changing the code, since it redeploys in one command. Requires SSH on the Deck:
+
+```bash
+# On the Deck, in Desktop Mode:
+passwd                            # set a password if the deck user has none
+sudo systemctl enable --now sshd
+ip addr show | grep 'inet '       # note the LAN IP
+```
+
+Then from your machine:
+
+```bash
+cp deploy.env.example deploy.env  # put the Deck's IP in it
+./scripts/deploy.ps1              # Windows
+./scripts/deploy.sh               # Git Bash / WSL / Linux
+```
+
+### Option 3 — build the zip yourself
+
+```bash
+yarn install && yarn build
+mkdir -p out/retroachievements
+cp -r dist main.py py_modules plugin.json package.json LICENSE README.md out/retroachievements/
+cd out && zip -r ../retroachievements.zip retroachievements
+```
+
+The archive must contain a **single top-level folder** holding `plugin.json`, `dist/`, `main.py`
+and `py_modules/`. That folder becomes the install directory under `~/homebrew/plugins/`; the name
+shown in Decky comes from `plugin.json`, not from the folder.
+
+To place it by hand instead, copy that folder to `~/homebrew/plugins/` on the Deck and restart the
+loader:
 
 ```bash
 sudo systemctl restart plugin_loader
 ```
 
-Then open the Decky menu, pick the trophy icon, and enter your username and web API key. The
-credentials are checked against RetroAchievements before they are saved, so a typo fails
+### First run
+
+Open the Decky menu, pick the trophy icon, and enter your RetroAchievements username and web API
+key. The credentials are checked against RetroAchievements before they are saved, so a typo fails
 immediately rather than quietly breaking every later request.
+
+### Updating
+
+Repeat whichever route you used. Installing over an existing copy is fine — your credentials live
+in Decky's settings directory, not in the plugin folder, so they survive an update.
 
 ## Development
 
@@ -100,14 +166,14 @@ images, or `main.py` itself. Those are Deck-only — see the deploy step.
 The Python tools need Python 3.11 on your PATH plus `pip install ruff pytest`. pyright is the
 exception — it ships its own stdlib stubs and type-checks the backend with no interpreter at all.
 
-**Frontend tests (80)** live beside the code as `src/services/*.test.ts` and cover the parsing
+**Frontend tests (100)** live beside the code as `src/services/*.test.ts` and cover the parsing
 layer — where the real risk is. RA's API is inconsistent about casing and about whether numbers
 arrive as `34` or `"34"`, and the per-game endpoint returns achievements as an object keyed by id.
 The suite pins down the unlocked-vs-locked determination (driven by the presence of `DateEarned`),
 hardcore vs softcore, unlocked-first sorting, the `{ok, data|error}` envelope unwrapping, error-kind
 mapping, and in-flight request de-duplication.
 
-**Backend tests (39, 1 skipped on Windows)** are pytest under `tests/`, covering the disk cache's TTL and corruption
+**Backend tests (73, 1 skipped on Windows)** are pytest under `tests/`, covering the disk cache's TTL and corruption
 handling, the settings store's 0600 permissions and its guarantee that the API key never leaves the
 backend, and the client's caching, auth-error mapping and parameter clamping.
 
