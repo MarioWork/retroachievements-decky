@@ -1,0 +1,11 @@
+{
+  "name": "RetroAchievements",
+  "author": "Mario Vieira",
+  "flags": [],
+  "api_version": 1,
+  "publish": {
+    "tags": ["retro", "emulation", "achievements"],
+    "description": "Browse your RetroAchievements profile and per-game achievement progress without leaving Game Mode.",
+    "image": "https://media.retroachievements.org/Images/000001.png"
+  }
+}

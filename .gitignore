@@ -1,0 +1,35 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+backend/out/
+bin/
+
+# test output (vitest coverage-v8 writes here)
+coverage/
+
+# local deploy config (contains your Deck's host/user)
+deploy.env
+
+# python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+
+# editors / os
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# logs
+*.log
+
+# yarn (berry) -- the release binary IS committed so the repo builds anywhere
+.yarn/*
+!.yarn/releases
+!.yarn/patches
+.pnp.*

@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RetroAchievements — dev harness</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: #0b0f14;
+        color: #ffffff;
+        font-family:
+          "Motiva Sans",
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        display: flex;
+        justify-content: center;
+        padding: 24px 0;
+      }
+      /* Approximates the Quick Access panel so layout choices transfer. */
+      .panel {
+        width: 320px;
+        background: #171d24;
+        border-radius: 6px;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      }
+      .panel-title {
+        padding: 10px 12px;
+        background: #1d242c;
+        font-size: 13px;
+        font-weight: 600;
+        border-bottom: 1px solid #1f252c;
+      }
+      button:focus-visible,
+      [role="button"]:focus-visible,
+      input:focus-visible {
+        outline: 2px solid #4b8ec8;
+        outline-offset: 1px;
+      }
+      /* Harness-only controls: unlock simulation and fault injection. */
+      .dev-controls {
+        position: fixed;
+        bottom: 16px;
+        right: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-end;
+      }
+      .dev-button,
+      .dev-select {
+        padding: 7px 12px;
+        border-radius: 4px;
+        border: 1px solid #2d3742;
+        background: #2d3742;
+        color: #fff;
+        font-size: 12px;
+        cursor: pointer;
+      }
+      .dev-label {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        align-items: flex-end;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #7a838c;
+      }
+      /* Approximates a Steam toast. The real one is rendered by Steam itself. */
+      .dev-toast {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        width: 260px;
+        padding: 10px 12px;
+        border-radius: 4px;
+        background: #2a323b;
+        border-left: 3px solid #e8b84b;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+        animation: ra-toast-in 160ms ease-out;
+      }
+      .dev-toast-title {
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .dev-toast-body {
+        font-size: 12px;
+        color: #c0c8d0;
+        margin-top: 2px;
+      }
+      @keyframes ra-toast-in {
+        from {
+          opacity: 0;
+          transform: translateY(-6px);
+        }
+      }
+      @keyframes ra-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./main.tsx"></script>
+  </body>
+</html>

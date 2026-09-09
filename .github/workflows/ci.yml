@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  frontend:
+    name: Frontend (typecheck, lint, test, build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # No corepack and no yarn install step: .yarn/releases/yarn-4.18.0.cjs is
+      # committed and yarnPath points at it, so `yarn` works straight away.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
+
+      - run: yarn install --immutable
+
+      - name: TypeScript
+        run: yarn typecheck
+
+      - name: ESLint
+        run: yarn lint
+
+      - name: Prettier
+        run: yarn format:check
+
+      # pyright ships its own stdlib stubs, so this needs no interpreter.
+      - name: Pyright (backend types)
+        run: yarn typecheck:py
+
+      - name: Vitest
+        run: yarn test
+
+      - name: Build
+        run: yarn build
+
+  backend:
+    name: Backend (ruff, pytest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # The plugin itself is stdlib-only; these are dev tools only.
+      - run: pip install ruff pytest
+
+      - name: Ruff lint
+        run: ruff check .
+
+      - name: Ruff format
+        run: ruff format --check .
+
+      - name: Pytest
+        run: pytest

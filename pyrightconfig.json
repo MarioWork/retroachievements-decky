@@ -1,0 +1,10 @@
+{
+  "include": ["main.py", "py_modules"],
+  "stubPath": "typings",
+  "exclude": ["**/__pycache__", "node_modules", "dist"],
+  "extraPaths": ["py_modules"],
+  "typeCheckingMode": "strict",
+  "pythonVersion": "3.11",
+  "reportMissingModuleSource": "none",
+  "reportMissingImports": "warning"
+}

@@ -1,0 +1,8 @@
+# The Deck runs Linux: shell scripts and Python must keep LF endings or the
+# shebang picks up a stray \r and the script fails to execute.
+* text=auto eol=lf
+
+*.ps1 text eol=crlf
+
+*.png binary
+*.jpg binary

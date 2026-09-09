@@ -1,0 +1,37 @@
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["py_modules", "."]
+exclude = ["node_modules", "dist", ".venv"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+    "ANN", # flake8-annotations
+    "ASYNC",
+    "S",   # bandit
+    "RET", # flake8-return
+    "SIM", # flake8-simplify
+    "TID", # flake8-tidy-imports
+    "PTH", # flake8-use-pathlib
+    "RUF",
+]
+ignore = [
+    "ANN401", # allow Any in the RPC boundary signatures
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101", "ANN"]      # asserts and loose annotations are fine in tests
+"main.py" = ["ANN401"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["ra"]
+
+[tool.pytest.ini_options]
+pythonpath = ["py_modules", "."]
+testpaths = ["tests"]
