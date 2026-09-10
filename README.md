@@ -215,14 +215,25 @@ src/components/        presentational only
 Dependencies flow one way. Components never fetch, views never build request params, services never
 import React.
 
-**The backend is deliberately thin.** It owns only what genuinely has to live outside the browser:
+**The backend is deliberately thin.** In order of how much it actually justifies itself:
 
-1. **The API key** — stored in `DECKY_PLUGIN_SETTINGS_DIR/settings.json` at `chmod 0600`. Without a
-   backend it would sit in Steam's SharedJSContext `localStorage`, which every other installed
-   Decky plugin can read. `get_settings()` returns `{username, has_key}` and never the key itself.
-2. **The HTTP call** — so `y=<key>` is injected server-side and never enters Steam's browser
-   context. This also sidesteps CORS.
-3. **A disk TTL cache** — unlike an in-memory frontend cache, it survives a Steam restart.
+1. **Unlock notifications.** The only hard requirement. A plugin's frontend is mounted only while
+   the Quick Access panel is open, so a `setInterval` there would stop polling precisely when you
+   are playing. The watcher has to be a backend task.
+2. **The HTTP call and disk cache.** Injecting `y=<key>` server-side sidesteps CORS and keeps the
+   key out of the browser context; the cache survives a Steam restart, and serves stale data with
+   its age when RetroAchievements is unreachable.
+3. **Credential storage** at `DECKY_PLUGIN_SETTINGS_DIR/settings.json`, `chmod 0600`.
+   `get_settings()` returns `{username, has_key}` and never the key.
+
+> **On that last point, stated accurately:** `0600` does _not_ protect the key from other Decky
+> plugins. Decky setuids every plugin to the same host user unless it carries the `root` flag, so
+> another plugin can read this file exactly as it could read `localStorage`. The narrower benefit
+> is that the key never enters Steam's SharedJSContext, and so is not exposed via CEF remote
+> debugging — which Decky serves over the network on port 8081 while developer mode is on.
+>
+> An earlier version of this README claimed the file was protected from other plugins. That was
+> wrong.
 
 Everything else — parsing, validation, normalisation, sorting, all typing — is TypeScript. That is
 why the dev harness is worth having: it exercises the real logic instead of a reimplementation.

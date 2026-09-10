@@ -1,10 +1,17 @@
 """Persistence for the RetroAchievements credentials.
 
-This is the main reason the plugin has a Python backend at all: the API key is
-written to a 0600 file owned by the `deck` user instead of living in Steam's
-SharedJSContext localStorage, which every other installed Decky plugin can read.
+Stored as JSON at 0600 in the plugin's settings directory. `api_key` never
+crosses the RPC boundary -- `public()` reports only whether a key is set.
 
-`api_key` never leaves this process -- `public()` is what the frontend sees.
+What 0600 does NOT buy: protection from other Decky plugins. Decky setuids every
+plugin process to the same host user unless it carries the `root` flag
+(sandboxed_plugin.py), so any other plugin can read this file just as it could
+read the frontend's localStorage. Treat both as equally reachable by anything
+else the user has installed.
+
+What it does buy is narrower: the key never enters Steam's SharedJSContext, so
+it is not exposed through CEF remote debugging, which Decky serves over the
+network on port 8081 while developer mode is on.
 """
 
 from __future__ import annotations
