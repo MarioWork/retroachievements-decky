@@ -217,9 +217,12 @@ import React.
 
 **The backend is deliberately thin.** In order of how much it actually justifies itself:
 
-1. **Unlock notifications.** The only hard requirement. A plugin's frontend is mounted only while
-   the Quick Access panel is open, so a `setInterval` there would stop polling precisely when you
-   are playing. The watcher has to be a backend task.
+1. **Unlock notifications.** A plugin's React content mounts only when it is the _active_ plugin
+   and either the panel is open or it sets `alwaysRender`, so a timer inside a component dies as
+   soon as you back out. A timer in the `definePlugin` closure would survive that, since Decky
+   calls each plugin's default export once at loader startup — so this is a strong preference, not
+   an absolute. The backend wins because its process outlives a SharedJSContext reload, and the
+   seen-unlock set persists to disk without a second storage mechanism.
 2. **The HTTP call and disk cache.** Injecting `y=<key>` server-side sidesteps CORS and keeps the
    key out of the browser context; the cache survives a Steam restart, and serves stale data with
    its age when RetroAchievements is unreachable.

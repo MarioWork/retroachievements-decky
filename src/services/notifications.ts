@@ -1,9 +1,15 @@
 /**
  * Turns backend unlock events into Steam toasts.
  *
- * Subscribed at plugin load (in `definePlugin`), NOT inside a component: the
- * plugin's content only mounts while the Quick Access panel is open, so a
- * component-level listener would miss every unlock earned during play.
+ * Subscribed in `definePlugin`, NOT inside a component. Decky calls each
+ * plugin's default export once during loadPlugins() at startup, so this
+ * listener is live from boot whether or not the user ever opens the panel.
+ * A component-level listener would only exist while the plugin is the active
+ * one with the panel open, and would miss every unlock earned during play.
+ *
+ * Delivery does not depend on the panel either: decky-loader keeps one global
+ * event-listener map fed by its WebSocket, and the toaster writes into Steam's
+ * own NotificationStore rather than into the Quick Access tree.
  */
 
 import { addEventListener, removeEventListener, toaster } from "@decky/api";

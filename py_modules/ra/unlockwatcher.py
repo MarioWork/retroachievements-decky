@@ -1,8 +1,16 @@
 """Background poller that turns new RetroAchievements unlocks into toasts.
 
-This has to live in the backend. A Decky plugin's frontend only mounts while the
-Quick Access panel is open, so a `setInterval` there would stop polling exactly
-when the user is playing -- which is the only time the feature matters.
+Why the backend rather than a `setInterval` in the frontend. A plugin's React
+content is mounted only when it is the *active* plugin and either the Quick
+Access panel is open or the plugin sets `alwaysRender` -- see decky-loader's
+PluginView.tsx. So a timer inside a component stops as soon as the user backs
+out, which is exactly when they are playing.
+
+A timer in the `definePlugin` closure would in fact survive that, since Decky
+calls the plugin's default export once at loader startup. The backend still
+wins for two concrete reasons: this process outlives a SharedJSContext reload
+(a Steam UI reload or crash would silently kill a frontend timer), and the seen
+set persists to disk here without another storage mechanism.
 
 The decision logic is deliberately a pure function (`select_new_unlocks`) with
 the fetch, emit and sleep all injected, so the awkward cases -- first run after
