@@ -1,6 +1,6 @@
 {
   "name": "retroachievements",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Browse your RetroAchievements profile and per-game achievement progress from Steam Deck Game Mode.",
   "type": "module",
   "license": "BSD-3-Clause",

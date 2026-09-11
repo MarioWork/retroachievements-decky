@@ -21,7 +21,7 @@ from ra.errors import RaError
 from ra.tls import build_ssl_context
 
 DEFAULT_TIMEOUT: Final = 15.0
-USER_AGENT: Final = "retroachievements-decky-plugin/0.1.0"
+USER_AGENT: Final = "retroachievements-decky-plugin/0.1.1"
 
 
 def status_to_error(status: int) -> RaError:
