@@ -270,6 +270,12 @@ unlocked — that field is what drives the unlocked-vs-locked rendering.
 - **Frontend debugging:** the CEF debugger at `http://<deck-ip>:8081` (Decky developer mode on).
 - **"Check your username and API key"** means RetroAchievements rejected the credentials — the key
   is wrong, or it was regenerated. Re-enter it from Account settings.
+- **"Could not reach RetroAchievements"** carries the backend's own wording in brackets, which is
+  what tells the causes apart: a timeout, a DNS failure, an RA outage, or
+  `certificate verify failed: unable to get local issuer certificate`. The last one is a trust-store
+  problem, not a network one — Decky runs plugin backends under its PyInstaller interpreter, whose
+  built-in certificate path does not exist on SteamOS, so `ra/tls.py` falls back to the CA bundle
+  the system actually ships.
 - **A blank panel** is a bug; every state should render something. Check the logs.
 - **Badge images not loading** points at Steam's CSP. All image URLs go through
   `getExternalResourceURL`; if you see broken tiles, that is where to look.

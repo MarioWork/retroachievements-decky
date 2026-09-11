@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
+import ssl
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -16,6 +18,7 @@ from collections.abc import Mapping
 from typing import Any, Final, Protocol
 
 from ra.errors import RaError
+from ra.tls import build_ssl_context
 
 DEFAULT_TIMEOUT: Final = 15.0
 USER_AGENT: Final = "retroachievements-decky-plugin/0.1.0"
@@ -50,10 +53,15 @@ class HttpClient(JsonGetter):
         *,
         timeout: float = DEFAULT_TIMEOUT,
         user_agent: str = USER_AGENT,
+        logger: logging.Logger | None = None,
+        context: ssl.SSLContext | None = None,
     ) -> None:
         self._base = base_url.rstrip("/")
         self._timeout = timeout
         self._user_agent = user_agent
+        # Built once at construction: Decky's frozen interpreter needs the trust
+        # store repaired before the first request, not on every one.
+        self._context = context or build_ssl_context(logger)
 
     async def get_json(self, path: str, params: Mapping[str, str]) -> Any:
         query = urllib.parse.urlencode(params)
@@ -67,7 +75,9 @@ class HttpClient(JsonGetter):
             method="GET",
         )
         try:
-            with urllib.request.urlopen(request, timeout=self._timeout) as response:  # noqa: S310
+            with urllib.request.urlopen(  # noqa: S310
+                request, timeout=self._timeout, context=self._context
+            ) as response:
                 body: str = response.read().decode("utf-8", errors="replace")
         except urllib.error.HTTPError as error:
             raise status_to_error(error.code) from error

@@ -45,7 +45,7 @@ class Plugin:
         client = RaClient(
             settings=settings,
             cache=DiskCache(runtime_dir / CACHE_DIRNAME),
-            http=HttpClient(BASE_URL),
+            http=HttpClient(BASE_URL, logger=decky.logger),
             logger=decky.logger,
         )
         self._client = client

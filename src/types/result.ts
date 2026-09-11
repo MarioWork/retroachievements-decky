@@ -53,6 +53,12 @@ export const fail = <T = never>(error: AppError): Result<T> => ({ ok: false, err
 
 export const appError = (kind: AppErrorKind, message: string): AppError => ({ kind, message });
 
+/** Appends the backend's own wording when it says more than the headline does. */
+function withDetail(headline: string, detail: string): string {
+  const trimmed = detail.trim();
+  return trimmed && trimmed !== headline ? `${headline} (${trimmed})` : headline;
+}
+
 /** Wording the user sees. The backend's message is a fallback, not the headline. */
 export function describeError(error: AppError): string {
   switch (error.kind) {
@@ -67,7 +73,11 @@ export function describeError(error: AppError): string {
     case "rateLimit":
       return "RetroAchievements is rate limiting us. Try again shortly.";
     case "network":
-      return "Could not reach RetroAchievements. Check your connection.";
+      // The backend distinguishes a timeout from a DNS failure from a TLS trust
+      // problem from an RA outage, and a bare "check your connection" throws all
+      // of that away -- leaving the Deck's logs as the only way to tell them
+      // apart. Keep the headline, append what actually happened.
+      return withDetail("Could not reach RetroAchievements. Check your connection.", error.message);
     case "parse":
       return "RetroAchievements sent something unexpected.";
     case "unexpected":

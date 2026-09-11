@@ -62,4 +62,21 @@ describe("describeError", () => {
   it("names the likeliest cause of a rejected key", () => {
     expect(describeError({ kind: "auth", message: "" })).toContain("regenerated");
   });
+
+  it("appends the backend's detail to a network failure", () => {
+    // Without this, a TLS trust failure and a dead router read identically.
+    const text = describeError({
+      kind: "network",
+      message: "Could not reach RetroAchievements: certificate verify failed",
+    });
+
+    expect(text).toContain("Check your connection");
+    expect(text).toContain("certificate verify failed");
+  });
+
+  it("does not repeat itself when the backend sent nothing useful", () => {
+    expect(describeError({ kind: "network", message: "" })).toBe(
+      "Could not reach RetroAchievements. Check your connection.",
+    );
+  });
 });
